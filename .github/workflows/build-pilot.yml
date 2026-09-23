@@ -1,0 +1,79 @@
+name: Build Pilot Binaries
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'go.mod'
+      - 'go.sum'
+      - 'pilot/**'
+      - '.github/workflows/build-pilot.yml'
+  workflow_dispatch:
+    inputs:
+      arch:
+        description: 'Target Architecture'
+        required: true
+        default: 'arm64'
+        type: choice
+        options:
+          - arm64
+          - amd64
+          - all
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Pilot (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: ${{ github.event.inputs.arch == 'amd64' && fromJSON('["amd64"]') || github.event.inputs.arch == 'all' && fromJSON('["arm64", "amd64"]') || fromJSON('["arm64"]') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+          cache: true
+
+      - name: Build pilot-discovery and pilot-agent
+        shell: bash
+        env:
+          GOOS: linux
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: '0'
+          STATIC: '1'
+          LDFLAGS: '-extldflags -static -s -w'
+        run: |
+          export GOPATH=$(go env GOPATH)
+          mkdir -p out
+
+          chmod +x common/scripts/gobuild.sh common/scripts/report_build_info.sh
+
+          echo "=== Building pilot-discovery for linux/${{ matrix.arch }} ==="
+          ./common/scripts/gobuild.sh out/pilot-discovery -tags=vtprotobuf,disable_pgv ./pilot/cmd/pilot-discovery
+
+          echo "=== Building pilot-agent for linux/${{ matrix.arch }} ==="
+          ./common/scripts/gobuild.sh out/pilot-agent -tags=agent,disable_pgv,grpcnotrace,retrynotrace ./pilot/cmd/pilot-agent
+
+          echo "=== Build output ==="
+          ls -lh out/
+          file out/* || true
+
+      - name: Upload Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilot-binaries-linux-${{ matrix.arch }}
+          path: |
+            out/pilot-discovery
+            out/pilot-agent
+          if-no-files-found: error

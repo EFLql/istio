@@ -67,6 +67,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stoewer/go-strcase v1.3.1
 	github.com/stretchr/testify v1.12.1
+	github.com/tetratelabs/wazero v1.10.1
 	github.com/vishvananda/netlink v1.3.1
 	github.com/vishvananda/netns v0.0.5
 	github.com/yl2chen/cidranger v1.0.2
@@ -237,3 +238,6 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.0 // indirect
 )
+
+replace github.com/tetratelabs/wazero => github.com/tetratelabs/wazero v1.10.1
+
