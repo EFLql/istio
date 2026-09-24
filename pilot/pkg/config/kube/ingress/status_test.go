@@ -263,7 +263,7 @@ func makeTestInformers(t *testing.T, name string) informers {
 	pods := krt.NewFilteredInformer[*corev1.Pod](client, kclient.Filter{
 		ObjectFilter:    client.ObjectFilter(),
 		ObjectTransform: kube.StripPodUnusedFields,
-		FieldSelector:   "status.phase!=Failed",
+		FieldSelector:   "",
 	}, opts.WithName("informer/Pods")...)
 	inf := informers{
 		mesh:            meshHolder,

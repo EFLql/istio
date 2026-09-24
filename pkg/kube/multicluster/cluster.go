@@ -295,7 +295,7 @@ func buildClusterCollections(client kube.Client, clusterID cluster.ID, opts krt.
 	Pods := krt.NewFilteredInformer[*corev1.Pod](client, kclient.Filter{
 		ObjectFilter:    client.ObjectFilter(),
 		ObjectTransform: kube.StripPodUnusedFields,
-		FieldSelector:   "status.phase!=Failed",
+		FieldSelector:   "",
 	}, opts.With(
 		krt.WithName(fmt.Sprintf("informer/Pods[%s]", clusterID)),
 		krt.WithMetadata(krt.Metadata{

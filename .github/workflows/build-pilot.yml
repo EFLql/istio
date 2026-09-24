@@ -9,6 +9,8 @@ on:
       - 'go.mod'
       - 'go.sum'
       - 'pilot/**'
+      - 'pkg/**'
+      - 'security/**'
       - '.github/workflows/build-pilot.yml'
   workflow_dispatch:
     inputs:
