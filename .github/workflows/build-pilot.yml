@@ -25,7 +25,7 @@ on:
           - all
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -79,3 +79,16 @@ jobs:
             out/pilot-discovery
             out/pilot-agent
           if-no-files-found: error
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v2
+        if: matrix.arch == 'arm64'
+        with:
+          tag_name: v-arm64-fixed
+          name: "Pilot Binaries Fixed for ARM64"
+          body: "Pilot binaries with status.phase field selector removed for standalone apiserver compatibility"
+          files: |
+            out/pilot-discovery
+            out/pilot-agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
