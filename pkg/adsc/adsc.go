@@ -421,12 +421,16 @@ func (a *ADSC) HasSynced() bool {
 	defer a.mutex.RUnlock()
 
 	for _, req := range a.cfg.InitialDiscoveryRequests {
+		if strings.Contains(req.TypeUrl, "TrafficExtension") {
+			continue
+		}
 		_, isMCP := convertTypeURLToMCPGVK(req.TypeUrl)
 		if !isMCP {
 			continue
 		}
 
 		if _, ok := a.sync[req.TypeUrl]; !ok {
+			adscLog.Infof("MCP config %s not synced yet", req.TypeUrl)
 			return false
 		}
 	}
@@ -1065,6 +1069,9 @@ func ConfigInitialRequests() []*discovery.DiscoveryRequest {
 		TypeUrl: gvk.MeshConfig.String(),
 	})
 	for _, sch := range collections.Pilot.All() {
+		if sch.GroupVersionKind().Kind == "TrafficExtension" {
+			continue
+		}
 		out = append(out, &discovery.DiscoveryRequest{
 			TypeUrl: sch.GroupVersionKind().String(),
 		})

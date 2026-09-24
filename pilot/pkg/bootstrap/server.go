@@ -893,18 +893,23 @@ func (s *Server) pushContextReady(expected int64) bool {
 // cachesSynced checks whether caches have been synced.
 func (s *Server) cachesSynced() bool {
 	if s.multiclusterController != nil && !s.multiclusterController.HasSynced() {
+		log.Debugf("cachesSynced: multiclusterController not synced")
 		return false
 	}
 	if s.ambientIndex != nil && !s.ambientIndex.HasSynced() {
+		log.Debugf("cachesSynced: ambientIndex not synced")
 		return false
 	}
 	if !s.ServiceController().HasSynced() {
+		log.Debugf("cachesSynced: ServiceController not synced")
 		return false
 	}
 	if !s.configController.HasSynced() {
+		log.Debugf("cachesSynced: configController not synced")
 		return false
 	}
 	if s.virtualServiceController != nil && !s.virtualServiceController.HasSynced() {
+		log.Debugf("cachesSynced: virtualServiceController not synced")
 		return false
 	}
 	return true

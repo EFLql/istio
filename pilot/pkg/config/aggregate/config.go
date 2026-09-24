@@ -180,14 +180,16 @@ type storeCache struct {
 }
 
 func (cr *storeCache) HasSynced() bool {
-	for _, cache := range cr.caches {
+	for i, cache := range cr.caches {
 		if !cache.HasSynced() {
+			log.Debugf("storeCache: cache[%d] (%T) not synced", i, cache)
 			return false
 		}
 	}
 
-	for _, kindStore := range cr.kindStores {
+	for k, kindStore := range cr.kindStores {
 		if !kindStore.collection.HasSynced() {
+			log.Debugf("storeCache: kindStore[%v] not synced", k)
 			return false
 		}
 	}
