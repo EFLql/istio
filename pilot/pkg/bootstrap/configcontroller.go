@@ -95,6 +95,8 @@ func (s *Server) initConfigController(args *PilotArgs) error {
 			return err
 		}
 		s.ConfigStores = append(s.ConfigStores, configController)
+		extensionController := extensions.NewController(configController, s.XDSServer, args.KrtDebugger)
+		s.ConfigStores = append(s.ConfigStores, extensionController)
 	} else {
 		err := s.initK8SConfigStore(args)
 		if err != nil {
@@ -363,6 +365,13 @@ func (s *Server) initConfigSources(args *PilotArgs) (err error) {
 				return fmt.Errorf("MCP: failed running %v", err)
 			}
 			s.ConfigStores = append(s.ConfigStores, configController)
+
+			// Register the WasmPlugin → TrafficExtension translation controller.
+			// This converts WasmPlugin resources into synthetic TrafficExtension configs so
+			// the rest of Pilot only ever needs to handle TrafficExtension.
+			extensionController := extensions.NewController(configController, s.XDSServer, args.KrtDebugger)
+			s.ConfigStores = append(s.ConfigStores, extensionController)
+
 			log.Infof("Started XDS configSource %s", configSource.Address)
 		case Kubernetes:
 			if srcAddress.Path == "" || srcAddress.Path == "/" {
