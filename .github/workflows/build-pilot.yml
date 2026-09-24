@@ -92,3 +92,16 @@ jobs:
             out/pilot-agent
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Binaries to Branch
+        if: matrix.arch == 'arm64'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          tar -czf /tmp/pilot-binaries-arm64.tar.gz -C out pilot-discovery pilot-agent
+          git checkout --orphan binaries-arm64
+          git rm -rf .
+          cp /tmp/pilot-binaries-arm64.tar.gz ./pilot-binaries-arm64.tar.gz
+          git add pilot-binaries-arm64.tar.gz
+          git commit -m "Auto-build pilot binaries for arm64"
+          git push -f origin binaries-arm64
