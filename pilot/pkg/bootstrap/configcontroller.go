@@ -355,7 +355,7 @@ func (s *Server) initConfigSources(args *PilotArgs) (err error) {
 				return fmt.Errorf("failed to dial XDS %s %v", configSource.Address, err)
 			}
 			// TODO: enable namespace filter for memory controller
-			configController := memory.NewController(collections.Pilot, false)
+			configController := memory.NewController(collections.Pilot, true)
 			configController.RegisterHasSyncedHandler(xdsMCP.HasSynced)
 			xdsMCP.Store = configController
 			err = xdsMCP.Run()

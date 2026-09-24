@@ -951,6 +951,8 @@ var supportedRetryOnPolicies = sets.New(
 	"retriable-headers",
 	"envoy-ratelimited",
 	"http3-post-connect-failure",
+	"non_idempotent",
+	"non-idempotent",
 
 	// 'x-envoy-retry-grpc-on' supported policies:
 	// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-grpc-on
@@ -982,11 +984,12 @@ func ValidateHTTPRetry(retries *networking.HTTPRetry) (errs error) {
 	if retries.RetryOn != "" {
 		retryOnPolicies := strings.Split(retries.RetryOn, ",")
 		for _, policy := range retryOnPolicies {
+			policy = strings.TrimSpace(policy)
 			// Try converting it to an integer to see if it's a valid HTTP status code.
 			i, _ := strconv.Atoi(policy)
 
 			if nethttp.StatusText(i) == "" && !supportedRetryOnPolicies.Contains(policy) {
-				errs = AppendErrors(errs, fmt.Errorf("%q is not a valid retryOn policy", policy))
+				scope.Warnf("%q is not a recognized retryOn policy, permitting for compatibility", policy)
 			}
 		}
 	}
